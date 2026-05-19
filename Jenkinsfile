@@ -30,12 +30,23 @@ pipeline {
                 }
             }
         }
-        stage('Ansible Configuration & UI Deployment') {
+        stage('Deploy Application via SSH') {
             steps {
                 bat '''
-                    cd ansible
-                    wsl -d Ubuntu chmod 400 ../vockey.pem
-                    wsl -d Ubuntu ansible-playbook -i inventory/inventory.ini playbook.yml --private-key=../vockey.pem
+                    @echo off
+                    echo Deploying files directly to AWS EC2 via Native SSH...
+
+                    cd terraform
+                    for /f "delims=" %%i in ('..\terraform.exe output -raw instance_public_ip') do set EC2_IP=%%i
+                    cd ..
+
+                    REM Disabling strict host key checking for automated deployment
+                    ssh -o StrictHostKeyChecking=no -i vockey.pem ubuntu@%EC2_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
+
+                    REM Copy web files directly to the server
+                    scp -o StrictHostKeyChecking=no -r -i vockey.pem ansible\files\web\* ubuntu@%EC2_IP%:/var/www/html/
+
+                    echo Deployment successful!
                 '''
             }
         }
