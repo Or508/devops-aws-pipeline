@@ -12,7 +12,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Correct syntax to delete everything but keep our specific files
                 cleanWs(deleteDirs: true, patterns: [
                     [pattern: 'terraform.exe', type: 'EXCLUDE'],
                     [pattern: 'vockey.pem', type: 'EXCLUDE']
@@ -33,12 +32,11 @@ pipeline {
         }
         stage('Ansible Configuration & UI Deployment') {
             steps {
-                sshagent(credentials: ['ssh-key-id']) {
-                    bat '''
-                        cd ansible
-                        call ansible-playbook -i inventory/inventory.ini playbook.yml
-                    '''
-                }
+                // Executing directly via bat, passing the key from the root workspace
+                bat '''
+                    cd ansible
+                    call ansible-playbook -i inventory/inventory.ini playbook.yml --private-key=..\\vockey.pem
+                '''
             }
         }
     }
