@@ -9,7 +9,7 @@ variable "aws_key_name" {
   type        = string
 
   validation {
-    condition     = length(trim(var.aws_key_name)) > 0
+    condition     = length(trimspace(var.aws_key_name)) > 0
     error_message = "aws_key_name must be a non-empty Key Pair name registered in AWS."
   }
 }
