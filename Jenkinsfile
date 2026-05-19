@@ -32,10 +32,10 @@ pipeline {
         }
         stage('Ansible Configuration & UI Deployment') {
             steps {
-                // Executing directly via bat, passing the key from the root workspace
                 bat '''
                     cd ansible
-                    call ansible-playbook -i inventory/inventory.ini playbook.yml --private-key=..\\vockey.pem
+                    wsl -d Ubuntu chmod 400 ../vockey.pem
+                    wsl -d Ubuntu ansible-playbook -i inventory/inventory.ini playbook.yml --private-key=../vockey.pem
                 '''
             }
         }
