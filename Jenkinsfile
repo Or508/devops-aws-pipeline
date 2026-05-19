@@ -1,14 +1,14 @@
 pipeline {
     agent any
-
-    parameters {
-        string(name: 'AWS_KEY_NAME', defaultValue: 'my-aws-key', description: 'Name of the AWS EC2 Key Pair')
-    }
-
+    
     environment {
         AWS_KEY_NAME = "${params.AWS_KEY_NAME}"
     }
-
+    
+    parameters {
+        string(name: 'AWS_KEY_NAME', defaultValue: 'vockey', description: 'Name of the AWS EC2 Key Pair')
+    }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -21,8 +21,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws-credentials-id', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     bat '''
                         cd terraform
-                        call terraform init
-                        call terraform apply -auto-approve -var="aws_key_name=%AWS_KEY_NAME%"
+                        ..\\terraform.exe init
+                        ..\\terraform.exe apply -auto-approve -var="aws_key_name=%AWS_KEY_NAME%"
                     '''
                 }
             }
