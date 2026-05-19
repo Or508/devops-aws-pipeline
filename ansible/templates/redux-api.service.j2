@@ -1,0 +1,16 @@
+[Unit]
+Description=Redux Movie API (Express)
+After=network.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+WorkingDirectory={{ app_dir }}/server
+Environment=NODE_ENV=production
+Environment=PORT={{ api_port }}
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

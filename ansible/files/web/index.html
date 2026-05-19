@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Nexus — Corporate Tech Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/site.css" />
+  </head>
+  <body>
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <div class="glow-orb glow-orb--a" aria-hidden="true"></div>
+    <div class="glow-orb glow-orb--b" aria-hidden="true"></div>
+
+    <header class="hero">
+      <p class="hero__eyebrow animate-fade-in">Jenkins · Terraform · Ansible</p>
+      <h1 class="hero__title animate-slide-up">Movie Nexus</h1>
+      <p class="hero__subtitle animate-slide-up delay-1">
+        Futuristic cinema intelligence — deployed via automated CI/CD pipeline
+      </p>
+      <div class="hero__actions animate-slide-up delay-2">
+        <a class="btn btn--primary" href="#features">Explore Platform</a>
+        <a class="btn btn--ghost" href="#status">System Status</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="features" class="panel animate-slide-up delay-3">
+        <h2>Enterprise Capabilities</h2>
+        <div class="cards">
+          <article class="card">
+            <span class="card__icon">⚡</span>
+            <h3>Infrastructure as Code</h3>
+            <p>Ubuntu EC2 provisioned on AWS with Terraform and immutable tagging.</p>
+          </article>
+          <article class="card">
+            <span class="card__icon">🔐</span>
+            <h3>Secure Delivery</h3>
+            <p>SSH key authentication via Jenkins credentials and hardened Ansible runs.</p>
+          </article>
+          <article class="card">
+            <span class="card__icon">📡</span>
+            <h3>Live Validation</h3>
+            <p>Post-deploy HTTP health checks confirm production readiness.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="status" class="panel panel--status animate-pulse-border">
+        <h2>Deployment Status</h2>
+        <ul class="status-list">
+          <li><span class="dot dot--ok"></span> Pipeline: <strong>ACTIVE</strong></li>
+          <li><span class="dot dot--ok"></span> Web Tier: <strong>ONLINE</strong></li>
+          <li><span class="dot dot--ok"></span> CDN Edge: <strong>SYNCED</strong></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© 2026 Movie Nexus — Corporate Technology Division</p>
+    </footer>
+  </body>
+</html>

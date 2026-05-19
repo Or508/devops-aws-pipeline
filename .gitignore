@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate*
+ansible/inventory/inventory.ini
+ansible/inventory/hosts.ini
+node_modules/
+client/node_modules/
+server/node_modules/
+client/dist/
+.env

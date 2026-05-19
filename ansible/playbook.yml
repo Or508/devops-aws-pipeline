@@ -1,0 +1,76 @@
+---
+- name: Deploy futuristic Movie Nexus web experience
+  hosts: webservers
+  become: true
+  vars:
+    web_root: /var/www/html
+    app_name: Movie Nexus
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - curl
+        state: present
+
+    - name: Ensure web root exists
+      ansible.builtin.file:
+        path: "{{ web_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Deploy landing page HTML
+      ansible.builtin.copy:
+        src: files/web/index.html
+        dest: "{{ web_root }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+    - name: Deploy corporate-grade animated stylesheet
+      ansible.builtin.copy:
+        src: files/web/site.css
+        dest: "{{ web_root }}/site.css"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+    - name: Remove default Nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload Nginx
+
+    - name: Configure Nginx for static site
+      ansible.builtin.template:
+        src: templates/nginx-site.conf.j2
+        dest: /etc/nginx/sites-available/movie-nexus.conf
+        mode: "0644"
+      notify: Reload Nginx
+
+    - name: Enable Movie Nexus site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/movie-nexus.conf
+        dest: /etc/nginx/sites-enabled/movie-nexus.conf
+        state: link
+      notify: Reload Nginx
+
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
