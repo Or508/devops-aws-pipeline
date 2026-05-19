@@ -12,8 +12,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // This tells Jenkins to clean everything EXCEPT our exe and pem files
-                cleanWs(patterns: [[pattern: 'terraform.exe', type: 'INCLUDE'], [pattern: 'vockey.pem', type: 'INCLUDE']], deleteDirs: false, invertPatterns: true)
+                // Correct syntax to delete everything but keep our specific files
+                cleanWs(deleteDirs: true, patterns: [
+                    [pattern: 'terraform.exe', type: 'EXCLUDE'],
+                    [pattern: 'vockey.pem', type: 'EXCLUDE']
+                ])
                 checkout scm
             }
         }
