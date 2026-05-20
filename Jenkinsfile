@@ -53,8 +53,8 @@ pipeline {
                     Write-Host "Deploying directly to Target IP: $TARGET_IP"
                     
                     # Run Native SSH and SCP
-                    ssh -o StrictHostKeyChecking=no -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
-                    scp -o StrictHostKeyChecking=no -r -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
+                    ssh -o StrictHostKeyChecking=no -i "C:/ProgramData/Jenkins/.jenkins/vockey.pem" ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
+                    scp -o StrictHostKeyChecking=no -r -i "C:/ProgramData/Jenkins/.jenkins/vockey.pem" ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
                     
                     Write-Host "Deployment Completed Successfully!"
                 '''
