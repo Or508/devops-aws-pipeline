@@ -47,15 +47,21 @@ pipeline {
                     
                     Write-Host "Deploying directly to Target IP: $TARGET_IP"
                     
-                    # Fix key permissions on the fly so native Windows ssh-add accepts it
-                    icacls "C:/jenkins_keys/vockey.pem" /inheritance:r /grant:r "SYSTEM:F"
+                    # Create a clean, isolated copy of the key inside the current temporary workspace
+                    $LocalKey = "$env:WORKSPACE/vockey_isolated.pem"
+                    Copy-Item "C:/jenkins_keys/vockey.pem" $LocalKey -Force
                     
-                    # Force add key to the Windows OS ssh-agent memory
-                    ssh-add "C:/jenkins_keys/vockey.pem"
+                    # Strip ALL permissions and grant Full Control ONLY to the specific user running this Jenkins process
+                    $CurrentFullUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+                    icacls $LocalKey /inheritance:r
+                    icacls $LocalKey /grant:r "${CurrentFullUser}:F"
                     
-                    # Run Native SSH and SCP using the active agent memory (No -i needed!)
-                    ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
-                    scp -o StrictHostKeyChecking=no -r ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
+                    # Run Native SSH and SCP using this strictly isolated key file
+                    ssh -o StrictHostKeyChecking=no -i $LocalKey ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
+                    scp -o StrictHostKeyChecking=no -i $LocalKey -r ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
+                    
+                    # Cleanup
+                    Remove-Item $LocalKey -Force
                     
                     Write-Host "Deployment Completed Successfully!"
                 '''
