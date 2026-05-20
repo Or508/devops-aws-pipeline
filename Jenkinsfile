@@ -37,7 +37,7 @@ pipeline {
             steps {
                 powershell '''
                     Set-Location terraform
-                    $TARGET_IP = (./terraform.exe output -no-color -raw instance_public_ip).Trim()
+                    $TARGET_IP = (../terraform.exe output -no-color -raw instance_public_ip).Trim()
                     Set-Location ..
                     
                     if (-not $TARGET_IP) {
