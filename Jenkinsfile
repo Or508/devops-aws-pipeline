@@ -34,19 +34,23 @@ pipeline {
             steps {
                 bat '''
                     @echo off
-                    echo Fetching clean target IP from Terraform...
+                    echo Exporting clean IP from Terraform to temporary file...
+                    terraform.exe output -no-color -raw instance_public_ip > ip.txt
                     
-                    rem Using -no-color to prevent ANSI characters from corrupting the variable
-                    for /f "tokens=*" %%i in ('terraform.exe output -no-color -raw instance_public_ip') do set TARGET_IP=%%i
+                    echo Reading IP from file...
+                    set /p TARGET_IP=<ip.txt
+                    
+                    rem Clean up the temporary file
+                    del ip.txt
                     
                     if "%TARGET_IP%"=="" (
-                        echo Error: Could not fetch Target IP from Terraform!
+                        echo Error: Could not read Target IP!
                         exit 1
                     )
                     
-                    echo Deploying to Target IP: %TARGET_IP%
+                    echo Deploying directly to Target IP: %TARGET_IP%
                     
-                    rem Using the absolute permanent path to vockey.pem to ensure it's accessible and never deleted by cleanWs
+                    rem Deploying using OpenSSH with absolute permanent key path
                     ssh -o StrictHostKeyChecking=no -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ubuntu@%TARGET_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
                     scp -o StrictHostKeyChecking=no -r -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ansible/files/web/* ubuntu@%TARGET_IP%:/var/www/html/
                     
