@@ -57,7 +57,11 @@ pipeline {
                     icacls $LocalKey /grant:r "${CurrentFullUser}:F"
                     
                     # Run Native SSH and SCP using this strictly isolated key file
-                    ssh -o StrictHostKeyChecking=no -i $LocalKey ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
+                    Write-Host "Installing Apache web server on the remote instance..."
+                    ssh -o StrictHostKeyChecking=no -i $LocalKey ubuntu@${TARGET_IP} "sudo apt-get update -y && sudo apt-get install apache2 -y && sudo systemctl start apache2 && sudo systemctl enable apache2"
+                    
+                    Write-Host "Setting folder permissions and uploading app files..."
+                    ssh -o StrictHostKeyChecking=no -i $LocalKey ubuntu@${TARGET_IP} "sudo mkdir -p /var/www/html && sudo chown -R ubuntu:ubuntu /var/www/html"
                     scp -o StrictHostKeyChecking=no -i $LocalKey -r ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
                     
                     # Cleanup
