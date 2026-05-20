@@ -34,19 +34,21 @@ pipeline {
             steps {
                 bat '''
                     @echo off
-                    echo Deploying files directly to AWS EC2 via Native SSH...
-
-                    cd terraform
-                    for /f "delims=" %%i in ('..\terraform.exe output -raw instance_public_ip') do set EC2_IP=%%i
-                    cd ..
-
-                    REM Disabling strict host key checking for automated deployment
-                    ssh -o StrictHostKeyChecking=no -i vockey.pem ubuntu@%EC2_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
-
-                    REM Copy web files directly to the server
-                    scp -o StrictHostKeyChecking=no -r -i vockey.pem ansible\files\web\* ubuntu@%EC2_IP%:/var/www/html/
-
-                    echo Deployment successful!
+                    echo Fetching target IP from Terraform...
+                    for /f "tokens=*" %%i in ('..\\terraform.exe output -raw instance_public_ip') do set TARGET_IP=%%i
+                    
+                    if "%TARGET_IP%"=="" (
+                        echo Error: Could not fetch Target IP from Terraform!
+                        exit 1
+                    )
+                    
+                    echo Deploying to Target IP: %TARGET_IP%
+                    
+                    rem Using forward slashes for key and asset paths to bypass Groovy string escape issues
+                    ssh -o StrictHostKeyChecking=no -i ../vockey.pem ubuntu@%TARGET_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
+                    scp -o StrictHostKeyChecking=no -r -i ../vockey.pem ansible/files/web/* ubuntu@%TARGET_IP%:/var/www/html/
+                    
+                    echo Deployment Completed Successfully!
                 '''
             }
         }
