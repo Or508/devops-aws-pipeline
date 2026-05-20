@@ -25,7 +25,7 @@ pipeline {
                     bat '''
                         cd terraform
                         ..\\terraform.exe init
-                        ..\\terraform.exe apply -auto-approve -var="aws_key_name=%AWS_KEY_NAME%"
+                        ..\\terraform.exe destroy -auto-approve -var="aws_key_name=vockey"
                     '''
                 }
             }
