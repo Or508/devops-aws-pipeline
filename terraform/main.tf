@@ -80,6 +80,10 @@ resource "aws_instance" "app_server" {
   key_name               = var.aws_key_name
   vpc_security_group_ids = [aws_security_group.app.id]
 
+  instance_market_options {
+    market_type = "spot"
+  }
+
   root_block_device {
     volume_size = 20
     volume_type = "gp3"
