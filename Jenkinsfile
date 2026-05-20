@@ -34,8 +34,10 @@ pipeline {
             steps {
                 bat '''
                     @echo off
-                    echo Fetching target IP from Terraform...
-                    for /f "tokens=*" %%i in ('terraform.exe output -raw instance_public_ip') do set TARGET_IP=%%i
+                    echo Fetching clean target IP from Terraform...
+                    
+                    rem Using -no-color to prevent ANSI characters from corrupting the variable
+                    for /f "tokens=*" %%i in ('terraform.exe output -no-color -raw instance_public_ip') do set TARGET_IP=%%i
                     
                     if "%TARGET_IP%"=="" (
                         echo Error: Could not fetch Target IP from Terraform!
@@ -44,9 +46,9 @@ pipeline {
                     
                     echo Deploying to Target IP: %TARGET_IP%
                     
-                    rem Using forward slashes for key and asset paths to bypass Groovy string escape issues
-                    ssh -o StrictHostKeyChecking=no -i ../vockey.pem ubuntu@%TARGET_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
-                    scp -o StrictHostKeyChecking=no -r -i ../vockey.pem ansible/files/web/* ubuntu@%TARGET_IP%:/var/www/html/
+                    rem Using the absolute permanent path to vockey.pem to ensure it's accessible and never deleted by cleanWs
+                    ssh -o StrictHostKeyChecking=no -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ubuntu@%TARGET_IP% "sudo chown -R ubuntu:ubuntu /var/www/html"
+                    scp -o StrictHostKeyChecking=no -r -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ansible/files/web/* ubuntu@%TARGET_IP%:/var/www/html/
                     
                     echo Deployment Completed Successfully!
                 '''
