@@ -35,31 +35,33 @@ pipeline {
         }
         stage('Deploy Application via SSH') {
             steps {
-                powershell '''
-                    Start-Sleep -Seconds 15
-                    
-                    # Move to the terraform directory cleanly
-                    Set-Location terraform
-                    
-                    # Use forward slash for the executable to avoid Jenkins escape bugs
-                    $TARGET_IP = (../terraform.exe output -no-color -raw instance_public_ip).Trim()
-                    
-                    # Move back to workspace root
-                    Set-Location ..
-                    
-                    if (-not $TARGET_IP) {
-                        Write-Error "Error: Could not fetch Target IP from Terraform!"
-                        exit 1
-                    }
-                    
-                    Write-Host "Deploying directly to Target IP: $TARGET_IP"
-                    
-                    # Run Native SSH and SCP
-                    ssh -o StrictHostKeyChecking=no -i "C:/jenkins_keys/vockey.pem" ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
-                    scp -o StrictHostKeyChecking=no -r -i "C:/jenkins_keys/vockey.pem" ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
-                    
-                    Write-Host "Deployment Completed Successfully!"
-                '''
+                sshagent(credentials: ['ssh-key-id']) {
+                    powershell '''
+                        Start-Sleep -Seconds 15
+                        
+                        # Move to the terraform directory cleanly
+                        Set-Location terraform
+                        
+                        # Use forward slash for the executable to avoid Jenkins escape bugs
+                        $TARGET_IP = (../terraform.exe output -no-color -raw instance_public_ip).Trim()
+                        
+                        # Move back to workspace root
+                        Set-Location ..
+                        
+                        if (-not $TARGET_IP) {
+                            Write-Error "Error: Could not fetch Target IP from Terraform!"
+                            exit 1
+                        }
+                        
+                        Write-Host "Deploying directly to Target IP: $TARGET_IP"
+                        
+                        # SSH agent injects the key — no -i path needed
+                        ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
+                        scp -o StrictHostKeyChecking=no -r ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
+                        
+                        Write-Host "Deployment Completed Successfully!"
+                    '''
+                }
             }
         }
     }
