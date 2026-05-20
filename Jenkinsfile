@@ -35,7 +35,7 @@ pipeline {
                 bat '''
                     @echo off
                     echo Fetching target IP from Terraform...
-                    for /f "tokens=*" %%i in ('..\\terraform.exe output -raw instance_public_ip') do set TARGET_IP=%%i
+                    for /f "tokens=*" %%i in ('terraform.exe output -raw instance_public_ip') do set TARGET_IP=%%i
                     
                     if "%TARGET_IP%"=="" (
                         echo Error: Could not fetch Target IP from Terraform!
