@@ -14,7 +14,10 @@ pipeline {
             steps {
                 cleanWs(deleteDirs: true, patterns: [
                     [pattern: 'terraform.exe', type: 'EXCLUDE'],
-                    [pattern: 'vockey.pem', type: 'EXCLUDE']
+                    [pattern: 'vockey.pem', type: 'EXCLUDE'],
+                    [pattern: 'terraform/terraform.tfstate', type: 'EXCLUDE'],
+                    [pattern: 'terraform/terraform.tfstate.backup', type: 'EXCLUDE'],
+                    [pattern: 'terraform/.terraform/**', type: 'EXCLUDE']
                 ])
                 checkout scm
             }
@@ -25,7 +28,7 @@ pipeline {
                     bat '''
                         cd terraform
                         ..\\terraform.exe init
-                        ..\\terraform.exe apply -auto-approve -var="aws_key_name=%AWS_KEY_NAME%"
+                        ..\\terraform.exe apply -auto-approve -no-color -var="aws_key_name=%AWS_KEY_NAME%"
                     '''
                 }
             }
@@ -33,7 +36,12 @@ pipeline {
         stage('Deploy Application via SSH') {
             steps {
                 powershell '''
-                    $TARGET_IP = (terraform.exe output -no-color -raw instance_public_ip).Trim()
+                    $env:TF_IN_AUTOMATION = "true"
+                    
+                    Push-Location terraform
+                    $TARGET_IP = (..\terraform.exe output -no-color -raw instance_public_ip).Trim()
+                    Pop-Location
+                    
                     if (-not $TARGET_IP) {
                         Write-Error "Error: Could not fetch Target IP from Terraform!"
                         exit 1
@@ -41,7 +49,7 @@ pipeline {
                     
                     Write-Host "Deploying directly to Target IP: $TARGET_IP"
                     
-                    # Run Native SSH and SCP using the clean PowerShell variable
+                    # Native OpenSSH — forward slashes only (Groovy-safe paths)
                     ssh -o StrictHostKeyChecking=no -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ubuntu@${TARGET_IP} "sudo chown -R ubuntu:ubuntu /var/www/html"
                     scp -o StrictHostKeyChecking=no -r -i "C:/Users/User/Desktop/devops-jenkins-terraform-ansible/vockey.pem" ansible/files/web/* ubuntu@${TARGET_IP}:/var/www/html/
                     
